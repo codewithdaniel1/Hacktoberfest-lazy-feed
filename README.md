@@ -1,6 +1,6 @@
 # Lazy Feed
 
-A small local website for catching up on new public Instagram posts. It reads public profile and post pages directly, then uses Gemma 4 through Ollama on your computer to summarize captions and pictures. There is no Apify account, SMS, `.env` file, npm dependency, or build step.
+A small local website for catching up on new public Instagram posts. It reads public profile and post pages directly, then uses Gemma 4 through Ollama on your computer to summarize captions, tagged locations when available, and pictures. Summaries appear above the media. There is no Apify account, SMS, `.env` file, npm dependency, or build step.
 
 ## Requirements
 

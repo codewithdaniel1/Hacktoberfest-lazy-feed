@@ -28,8 +28,6 @@ function makePost(post) {
     imageLink.classList.add('image-placeholder');
     imageLink.textContent = post.videoUrl ? 'VIDEO' : 'POST';
   }
-  article.append(imageLink);
-
   const content = document.createElement('div');
   content.className = 'post-content';
   const meta = document.createElement('div');
@@ -66,7 +64,7 @@ function makePost(post) {
   source.rel = 'noreferrer';
   source.textContent = 'View on Instagram ↗';
   content.append(source);
-  article.append(content);
+  article.append(content, imageLink);
   return article;
 }
 
