@@ -1,0 +1,14 @@
+{
+  "instagramProfiles": [
+    "https://www.instagram.com/nyuniversity/",
+    "https://www.instagram.com/nyutandon/",
+    "https://www.instagram.com/meetnyu/",
+    "https://www.instagram.com/nyuhousing/",
+    "https://www.instagram.com/nyu.eats/"
+  ],
+  "ollamaUrl": "http://127.0.0.1:11434",
+  "ollamaModel": "gemma4:e2b-it-qat",
+  "port": 4317,
+  "dailyAt": "09:00",
+  "timeZone": "America/New_York"
+}
