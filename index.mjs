@@ -54,7 +54,14 @@ async function request(url, options = {}, timeoutMs = 120_000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
+    let response;
+    try { response = await fetch(url, { ...options, signal: controller.signal }); }
+    catch (error) {
+      if (error.name === 'AbortError') throw error;
+      const target = new URL(url).host;
+      const cause = error.cause?.code || error.cause?.message || error.message;
+      throw new Error(`Could not reach ${target}: ${cause}`);
+    }
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}: ${await response.text()}`);
     return response;
   } finally { clearTimeout(timer); }
