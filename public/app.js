@@ -3,6 +3,11 @@ const statusText = document.querySelector('#status');
 const refreshButton = document.querySelector('#refresh');
 const updatedText = document.querySelector('#updated');
 const accountsText = document.querySelector('#accounts');
+const accountsList = document.querySelector('#accounts-list');
+const accountForm = document.querySelector('#account-form');
+const usernameInput = document.querySelector('#username');
+const accountStatus = document.querySelector('#account-status');
+let accountBusy = false;
 
 function formatDate(value) {
   if (!value) return '';
@@ -87,6 +92,24 @@ function render(data) {
   }
   updatedText.textContent = data.lastUpdated ? `Updated ${formatDate(data.lastUpdated)}` : '';
   accountsText.textContent = `${data.handles.length} public ${data.handles.length === 1 ? 'account' : 'accounts'} · daily at ${data.dailyAt} ${data.timeZone}`;
+  accountsList.replaceChildren();
+  for (const handle of data.handles) {
+    const item = document.createElement('li');
+    item.className = 'account-chip';
+    const name = document.createElement('span');
+    name.textContent = `@${handle}`;
+    const remove = document.createElement('button');
+    remove.className = 'remove-account';
+    remove.type = 'button';
+    remove.textContent = 'Remove';
+    remove.setAttribute('aria-label', `Remove @${handle}`);
+    remove.disabled = accountBusy;
+    remove.addEventListener('click', () => changeAccount('remove', handle));
+    item.append(name, remove);
+    accountsList.append(item);
+  }
+  usernameInput.disabled = accountBusy;
+  accountForm.querySelector('button[type="submit"]').disabled = accountBusy;
   refreshButton.disabled = data.refreshing;
   refreshButton.innerHTML = data.refreshing ? '<span class="spin" aria-hidden="true">↻</span> Reading posts…' : '<span aria-hidden="true">↻</span> Refresh feed';
   if (data.refreshing) statusText.textContent = 'Gemma is catching up…';
@@ -94,6 +117,35 @@ function render(data) {
   else if (data.lastUpdated) statusText.textContent = 'You’re all caught up.';
   else statusText.textContent = 'Ready when you are.';
 }
+
+async function changeAccount(action, username) {
+  if (accountBusy) return;
+  accountBusy = true;
+  accountStatus.textContent = action === 'add' ? 'Adding account…' : 'Removing account…';
+  try {
+    const response = await fetch('/api/accounts', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, username }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Could not update accounts.');
+    if (action === 'add') usernameInput.value = '';
+    accountStatus.textContent = 'Saved on this computer.';
+    await loadFeed();
+  } catch (error) {
+    accountStatus.textContent = error.message;
+  } finally {
+    accountBusy = false;
+    usernameInput.disabled = false;
+    accountForm.querySelector('button[type="submit"]').disabled = false;
+    accountsList.querySelectorAll('button').forEach((button) => { button.disabled = false; });
+  }
+}
+
+accountForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  changeAccount('add', usernameInput.value.trim());
+});
 
 async function loadFeed() {
   const response = await fetch('/api/feed', { cache: 'no-store' });

@@ -34,6 +34,21 @@
           </aside>
         </section>
 
+        <section class="accounts-section" aria-labelledby="accounts-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">Your people</p><h2 id="accounts-title">Instagram accounts</h2></div>
+            <p id="account-status" class="updated" role="status" aria-live="polite"></p>
+          </div>
+          <form id="account-form" class="account-form">
+            <label for="username">Public Instagram username</label>
+            <div class="account-input-row">
+              <input id="username" name="username" type="text" placeholder="@username" autocomplete="off" required />
+              <button class="refresh-button" type="submit">Add account</button>
+            </div>
+          </form>
+          <ul id="accounts-list" class="accounts-list" aria-label="Followed Instagram accounts"></ul>
+        </section>
+
         <section class="feed-section" aria-labelledby="feed-title">
           <div class="section-heading">
             <div><p class="eyebrow">The latest</p><h2 id="feed-title">Your catch-up</h2></div>

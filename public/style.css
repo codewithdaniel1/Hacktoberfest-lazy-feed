@@ -40,6 +40,17 @@ h1 em { color: var(--green); font-family: var(--serif); font-weight: 400; letter
 .brain-card h2 { margin-bottom: 8px; font: 700 22px system-ui, sans-serif; letter-spacing: -.04em; }
 .brain-card > p:last-child { margin-bottom: 0; color: #67736a; font-size: 12px; line-height: 1.6; }
 .feed-section { padding-top: 38px; }
+.accounts-section { padding-top: 34px; }
+.account-form { max-width: 440px; margin-bottom: 15px; }
+.account-form label { display: block; margin-bottom: 7px; color: var(--muted); font-size: 12px; font-weight: 600; }
+.account-input-row { display: flex; gap: 9px; }
+.account-input-row input { min-width: 0; flex: 1; border: 1px solid var(--line); border-radius: 9px; padding: 11px 13px; background: #fffefa; color: var(--ink); font: inherit; }
+.account-input-row input:focus { outline: 2px solid #9bb3a0; outline-offset: 1px; }
+.accounts-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.account-chip { display: flex; align-items: center; gap: 11px; border: 1px solid var(--line); border-radius: 30px; padding: 7px 8px 7px 13px; background: #fffefa; color: var(--green); font-size: 12px; font-weight: 650; }
+.remove-account { border: 0; border-radius: 20px; padding: 5px 8px; background: #f1eee8; color: #777b73; font: inherit; font-size: 10px; cursor: pointer; }
+.remove-account:hover:not(:disabled) { background: #f8e7e3; color: #9b4136; }
+.remove-account:disabled { cursor: wait; opacity: .6; }
 .section-heading { display: flex; align-items: end; justify-content: space-between; margin-bottom: 22px; }
 .section-heading .eyebrow { margin-bottom: 7px; }
 .section-heading h2 { margin-bottom: 0; font: 700 27px system-ui, sans-serif; letter-spacing: -.055em; }

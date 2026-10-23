@@ -286,8 +286,10 @@ async function refresh(settings) {
   refreshing = true;
   lastError = '';
   try {
+    const profiles = state.profiles.map(parseProfileUrl);
+    if (!profiles.length) throw new Error('Add an Instagram account before refreshing your feed.');
     console.log('Collecting recent public Instagram posts…');
-    const posts = await collect(settings);
+    const posts = await collect({ ...settings, profiles });
     const fresh = posts.filter((post) => !(state.seen[post.username] || []).includes(post.id));
     const temp = await mkdtemp(join(tmpdir(), 'lazy-feed-'));
     const additions = [];
@@ -322,6 +324,16 @@ function sendJson(response, status, data) {
   response.end(JSON.stringify(data));
 }
 
+async function readJson(request) {
+  let body = '';
+  for await (const chunk of request) {
+    body += chunk;
+    if (body.length > 4096) throw new Error('Request is too large.');
+  }
+  try { return JSON.parse(body || '{}'); }
+  catch { throw new Error('Request body must be valid JSON.'); }
+}
+
 function validLocalOrigin(request) {
   if (!request.headers.origin) return true;
   try {
@@ -334,8 +346,33 @@ function createApp(settings) {
   return createServer(async (request, response) => {
     const pathname = new URL(request.url, 'http://127.0.0.1').pathname;
     if (request.method === 'GET' && pathname === '/api/feed') {
+      const activeHandles = new Set(state.profiles.map((value) => parseProfileUrl(value).handle.toLowerCase()));
       sendJson(response, 200, { items: state.items, lastUpdated: state.lastUpdated, refreshing, lastError,
-        handles: settings.profiles.map((profile) => profile.handle), dailyAt: settings.dailyAt, timeZone: settings.timeZone });
+        handles: [...activeHandles], items: state.items.filter((item) => activeHandles.has(item.username.toLowerCase())),
+        dailyAt: settings.dailyAt, timeZone: settings.timeZone });
+      return;
+    }
+    if (request.method === 'POST' && pathname === '/api/accounts') {
+      if (!validLocalOrigin(request)) { sendJson(response, 403, { error: 'Local requests only.' }); return; }
+      try {
+        const body = await readJson(request);
+        const profile = parseProfileUrl(String(body.username || '').trim());
+        const profiles = state.profiles.map(parseProfileUrl);
+        if (body.action === 'add') {
+          if (profiles.some((entry) => entry.handle.toLowerCase() === profile.handle.toLowerCase())) {
+            sendJson(response, 200, { handles: profiles.map((entry) => entry.handle) });
+            return;
+          }
+          if (profiles.length >= 10) throw new Error('You can follow up to 10 accounts.');
+          state.profiles.push(profile.url);
+        } else if (body.action === 'remove') {
+          state.profiles = state.profiles.filter((value) => parseProfileUrl(value).handle.toLowerCase() !== profile.handle.toLowerCase());
+        } else {
+          throw new Error('Choose add or remove.');
+        }
+        await saveState(state);
+        sendJson(response, 200, { handles: state.profiles.map((value) => parseProfileUrl(value).handle) });
+      } catch (error) { sendJson(response, 400, { error: error.message }); }
       return;
     }
     if (request.method === 'POST' && pathname === '/api/refresh') {
@@ -363,6 +400,10 @@ function createApp(settings) {
 async function main() {
   const settings = await config();
   state = await loadState();
+  if (!Array.isArray(state.profiles)) {
+    state.profiles = settings.profiles.map((profile) => profile.url);
+    await saveState(state);
+  }
   const server = createApp(settings);
   server.listen(settings.port, '127.0.0.1', () => {
     console.log(`Lazy Feed is ready at http://127.0.0.1:${settings.port}`);

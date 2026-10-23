@@ -11,7 +11,7 @@ A small local website for catching up on new public Instagram posts. It reads pu
 
 ## Run it
 
-The checked-in `config.json` has five editable NYU public-account examples. They are examples, not personal friends. Edit the profile URLs if you want different public accounts. Teammates can use the same project config or customize their local copy.
+The checked-in `config.json` has five NYU public-account examples used to seed the first run. Add or remove public usernames in the website; your list is saved in `.lazy-feed/state.json` on that computer and persists across app restarts. Each teammate gets their own local account list. The state folder is ignored by Git.
 
 ```sh
 ollama pull gemma4:e2b-it-qat
